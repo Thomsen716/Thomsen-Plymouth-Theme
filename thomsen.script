@@ -1,0 +1,100 @@
+# Thomsen Plymouth theme - scales with screen height (designed at 1080p)
+
+Window.SetBackgroundTopColor(0.043, 0.051, 0.071);
+Window.SetBackgroundBottomColor(0.043, 0.051, 0.071);
+
+W = Window.GetWidth();
+H = Window.GetHeight();
+s = H / 1080;
+
+# ---- sizes ----
+logo_size = Math.Int(260 * s);
+bar_w = Math.Int(560 * s);
+bar_h = Math.Int(4 * s);
+if (bar_h < 2) bar_h = 2;
+
+top = H / 2 - 230 * s;
+
+# ---- logo ----
+logo.image = Image("logo.png").Scale(logo_size, logo_size);
+logo.sprite = Sprite(logo.image);
+logo.sprite.SetX(W / 2 - logo_size / 2);
+logo.sprite.SetY(top);
+
+# ---- wordmark ----
+wm.raw = Image("wordmark.png");
+wm.f = (560 * s) / wm.raw.GetWidth();
+wm.w = Math.Int(wm.raw.GetWidth() * wm.f);
+wm.h = Math.Int(wm.raw.GetHeight() * wm.f);
+wm.image = wm.raw.Scale(wm.w, wm.h);
+wm.sprite = Sprite(wm.image);
+wm.y = top + logo_size + 50 * s;
+wm.sprite.SetX(W / 2 - wm.w / 2);
+wm.sprite.SetY(wm.y);
+
+# ---- SYSTEM BOOT label ----
+sb.raw = Image("sysboot.png");
+sb.f = (340 * s) / sb.raw.GetWidth();
+sb.w = Math.Int(sb.raw.GetWidth() * sb.f);
+sb.h = Math.Int(sb.raw.GetHeight() * sb.f);
+sb.image = sb.raw.Scale(sb.w, sb.h);
+sb.sprite = Sprite(sb.image);
+sb.y = wm.y + wm.h + 30 * s;
+sb.sprite.SetX(W / 2 - sb.w / 2);
+sb.sprite.SetY(sb.y);
+
+# ---- progress bar ----
+bar.y = sb.y + sb.h + 40 * s;
+bar.bg = Sprite(Image("bar_bg.png").Scale(bar_w, bar_h));
+bar.bg.SetX(W / 2 - bar_w / 2);
+bar.bg.SetY(bar.y);
+bar.fill_image = Image("bar_fill.png");
+bar.fill = Sprite(bar.fill_image.Scale(1, bar_h));
+bar.fill.SetX(W / 2 - bar_w / 2);
+bar.fill.SetY(bar.y);
+bar.fill.SetZ(10);
+
+fun progress_cb(time, progress) {
+    w = Math.Int(bar_w * progress);
+    if (w < 1) w = 1;
+    if (w > bar_w) w = bar_w;
+    bar.fill.SetImage(bar.fill_image.Scale(w, bar_h));
+}
+Plymouth.SetBootProgressFunction(progress_cb);
+
+# ---- gentle logo pulse ----
+frame = 0;
+fun refresh_cb() {
+    frame = frame + 1;
+    logo.sprite.SetOpacity(0.85 + 0.15 * Math.Sin(frame / 25));
+}
+Plymouth.SetRefreshFunction(refresh_cb);
+
+# ---- disk encryption password prompt ----
+pw.label = Sprite();
+pw.dots = Sprite();
+pw.label.SetOpacity(0);
+pw.dots.SetOpacity(0);
+
+fun password_cb(prompt_text, bullets) {
+    limg = Image.Text(prompt_text, 0.78, 0.81, 0.85);
+    pw.label.SetImage(limg);
+    pw.label.SetX(W / 2 - limg.GetWidth() / 2);
+    pw.label.SetY(bar.y + 70 * s);
+    pw.label.SetOpacity(1);
+
+    str = " ";
+    for (i = 0; i < bullets; i++) str = str + "*";
+    dimg = Image.Text(str, 0.0, 0.67, 0.96);
+    pw.dots.SetImage(dimg);
+    pw.dots.SetX(W / 2 - dimg.GetWidth() / 2);
+    pw.dots.SetY(bar.y + 110 * s);
+    pw.dots.SetOpacity(1);
+}
+Plymouth.SetDisplayPasswordFunction(password_cb);
+
+fun normal_cb() {
+    pw.label.SetOpacity(0);
+    pw.dots.SetOpacity(0);
+}
+Plymouth.SetDisplayNormalFunction(normal_cb);

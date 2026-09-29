@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Thomsen Plymouth Theme
+Description=Custom Plymouth Theme
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/Thomsen-Plymouth-Theme
+ScriptFile=/usr/share/plymouth/themes/Thomsen-Plymouth-Theme/thomsen.script
